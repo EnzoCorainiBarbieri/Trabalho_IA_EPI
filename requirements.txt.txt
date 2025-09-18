@@ -1,5 +1,0 @@
-ultralytics
-matplotlib
-pandas
-flask
-sqlalchemy
