@@ -1,0 +1,10 @@
+path: C:\Users\gabri\OneDrive\Documentos\unimax-ia\trabalho 4 tentativa 3\datasets\epi
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: helmet
+  1: vest
+  2: goggles
+  3: mask
+  4: gloves
