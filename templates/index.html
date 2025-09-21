@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>ProtegeAÍ — Monitor EPI (Live)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo"></div>
+      <h1>ProtegeAÍ — Monitor EPI</h1>
+    </header>
+
+    <div class="grid">
+      <!-- LIVE CAMERA -->
+      <section class="card">
+        <h2>Detecção ao vivo (webcam/RTSP)</h2>
+        <div class="row mb10">
+          <select id="source">
+            <option value="0">Webcam 0 (padrão)</option>
+            <option value="1">Webcam 1</option>
+            <option value="2">Webcam 2</option>
+          </select>
+          <button class="btn" id="btnStart">Ligar câmera</button>
+          <button class="btn secondary" id="btnStop">Desligar</button>
+        </div>
+
+        <img id="stream" class="thumb" src="/stream.mjpg" alt="stream" onerror="this.src=''" />
+
+        <div class="row mt10">
+          <div>Estado: <span id="liveState" class="status">Desligado</span></div>
+          <div class="flex1"></div>
+          <label class="row gap6">
+            <input type="checkbox" id="autoSaveHelmet" />
+            <span class="muted">Auto-salvar quando faltar capacete</span>
+          </label>
+          <button class="btn danger" id="btnSaveHelmet">Salvar log</button>
+        </div>
+
+        <div class="stack mt12">
+          <div class="muted">Detectando agora:</div>
+          <div id="summary">—</div>
+          <div class="muted">Itens essenciais ausentes: <span id="missing">—</span></div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card mt16">
+      <h2>Logs recentes (JSON)</h2>
+      <div class="row">
+        <button class="btn secondary" id="btnLoadLogs">Atualizar</button>
+        <div class="muted">Ver também: <a href="/logs" target="_blank">/logs</a></div>
+      </div>
+      <pre id="logs" class="pre"></pre>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // mapa EN -> PT-BR
+    const PT = {
+      helmet: "capacete",
+      vest: "colete",
+      mask: "máscara",
+      goggles: "óculos",
+      gloves: "luvas"
+    };
+    const toPT = (name) => PT[name?.toLowerCase?.()] || name;
+
+    const elStream = $("stream");
+    const elState  = $("liveState");
+    const elSummary= $("summary");
+    const elMissing= $("missing");
+    const elAuto   = $("autoSaveHelmet");
+    let poll = null;
+
+    function setState(txt, ok=false){
+      elState.textContent = txt;
+      elState.className = "status " + (ok ? "ok":"alert");
+    }
+
+    async function startLive(){
+      const source = $("source").value;
+      const fd = new FormData(); fd.append("source", source);
+      const r = await fetch("/start_live", {method:"POST", body:fd});
+      const js = await r.json();
+      if(js.status === "running" || js.status === "already_running"){
+        elStream.src = "/stream.mjpg?ts="+Date.now();
+        setState("Ligado", true);
+        if(!poll) poll = setInterval(refreshStatus, 800);
+      }else{
+        setState("Falha ao ligar", false);
+        alert(js.message || "Erro ao iniciar");
+      }
+    }
+
+    async function stopLive(){
+      await fetch("/stop_live", {method:"POST"});
+      setState("Desligado", false);
+      elStream.src = "";
+      if(poll){ clearInterval(poll); poll = null; }
+    }
+
+    async function refreshStatus(){
+      try{
+        const r = await fetch("/live_status");
+        const js = await r.json();
+
+        // summary traduzido
+        elSummary.innerHTML = "";
+        const summary = js.summary || {};
+        const keys = Object.keys(summary);
+        if(keys.length){
+          const frag = document.createDocumentFragment();
+          keys.forEach((k)=>{
+            const span = document.createElement("span");
+            span.className="pill";
+            span.textContent = `${toPT(k)}: ${summary[k]}`;
+            frag.appendChild(span);
+          });
+          elSummary.appendChild(frag);
+        }else{
+          elSummary.textContent = "—";
+        }
+
+        // missing traduzido
+        const miss = (js.missing_essentials || []).map(toPT);
+        elMissing.textContent = miss.length ? miss.join(", ") : "—";
+
+        // auto-salvar se faltar capacete
+        if(elAuto.checked){
+          if(miss.map(s=>s.toLowerCase()).includes("capacete")){
+            await fetch("/save_current?reason=helmet_missing", {method:"POST"});
+          }
+        }
+      }catch(e){ /* ignora */ }
+    }
+
+    async function saveHelmet(){
+      const r = await fetch("/save_current?reason=helmet_missing", {method:"POST"});
+      const js = await r.json();
+      alert(js.status === "ok" ? "Log salvo!" : "Falha ao salvar log");
+    }
+
+    async function loadLogs(){
+      const r = await fetch("/logs?limit=20");
+      const js = await r.json();
+      $("logs").textContent = JSON.stringify(js, null, 2);
+    }
+
+    $("btnStart").onclick = startLive;
+    $("btnStop").onclick = stopLive;
+    $("btnSaveHelmet").onclick = saveHelmet;
+    $("btnLoadLogs").onclick = loadLogs;
+  </script>
+</body>
+</html>

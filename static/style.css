@@ -1,0 +1,268 @@
+/* ==========================================================================
+   ProtegeAÍ — CSS principal
+   Estrutura:
+   0) Design Tokens (cores, espaçamentos, raios, sombras)
+   1) Reset & Base (normalize simples + tipografia)
+   2) Layout (container, header, grid)
+   3) Componentes (card, botões, chips/pills, status, miniaturas)
+   4) Formulários (inputs/selects, focus)
+   5) Utilidades (helpers de espaçamento, alinhamento)
+   6) Responsivo e Acessibilidade
+   ========================================================================== */
+
+
+/* == 0) DESIGN TOKENS ===================================================== */
+:root {
+  /* Paleta */
+  --bg:        #0b1220;   /* fundo geral */
+  --surface:   #111b2b;   /* cartões/painéis */
+  --border:    #223453;   /* bordas sutis */
+  --muted:     #96a6c4;   /* texto secundário */
+  --text:      #e6eefc;   /* texto principal */
+
+  --accent:    #4fd1c5;   /* ação/primário */
+  --accent-ink:#062028;   /* texto sobre primário */
+
+  --ok:        #22c55e;   /* sucesso */
+  --warn:      #f59e0b;   /* atenção */
+  --err:       #ef4444;   /* erro */
+
+  /* Tipografia */
+  --font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  --fz-1: 12px;
+  --fz-2: 14px;
+  --fz-3: 16px;
+  --fz-4: 20px;
+
+  /* Espaçamentos (escala de 4) */
+  --sp-0: 0px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+
+  /* Raios & sombras */
+  --r-sm: 8px;
+  --r-md: 11px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.25);
+
+  /* Borda de foco acessível */
+  --focus: 0 0 0 3px rgba(79, 209, 197, 0.35);
+}
+
+
+/* == 1) RESET & BASE ====================================================== */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-family);
+  line-height: 1.45;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+a:hover { text-decoration: underline; }
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus);
+  transition: box-shadow .15s ease;
+}
+
+
+/* == 2) LAYOUT ============================================================ */
+.wrap {
+  max-width: 1100px;
+  margin: var(--sp-6) auto;
+  padding: 0 var(--sp-4);
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+
+.logo {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg,#1f8efa,#6ee7b7);
+  box-shadow: var(--shadow-sm);
+}
+
+h1 {
+  font-size: var(--fz-4);
+  margin: 0;
+}
+
+.grid {
+  /* hoje a página tem 1 card principal; mantemos grid para evoluções futuras */
+  display: grid;
+  gap: var(--sp-4);
+  grid-template-columns: 1fr; /* 1 coluna por padrão */
+}
+
+
+/* == 3) COMPONENTES ======================================================= */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: var(--sp-4);
+  box-shadow: var(--shadow-sm);
+}
+
+.card h2 {
+  font-size: var(--fz-3);
+  margin: 0 0 var(--sp-3);
+}
+
+.muted { color: var(--muted); font-size: var(--fz-2); }
+
+.btn {
+  display: inline-block;
+  border: 0;
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: var(--accent-ink);
+  transition: transform .05s ease, filter .15s ease, opacity .15s ease;
+  user-select: none;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+
+.btn.secondary {
+  background: #1f2b40;
+  color: #cfe3ff;
+  border: 1px solid #2a3c5a;
+}
+
+.btn.danger {
+  background: var(--err);
+  color: #fff;
+}
+
+.pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: var(--fz-1);
+  background: #0f1728;
+  border: 1px solid #2a3c5c;
+  margin: 3px 6px 0 0;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--fz-1);
+  background: #0f1728;
+  border: 1px solid #2a3c5c;
+}
+
+.thumb {
+  width: 100%;
+  border-radius: var(--r-lg);
+  border: 1px solid #23324d;
+  box-shadow: var(--shadow-sm);
+}
+
+.status { font-weight: 700; }
+.status.ok { color: var(--ok); }
+.status.alert { color: var(--warn); }
+
+.hint { font-size: var(--fz-1); color: #98a9cb; }
+
+.stack { display: flex; flex-direction: column; gap: var(--sp-2); }
+
+.pre {
+  white-space: pre-wrap;
+  background: #0f1728;
+  padding: var(--sp-3);
+  border-radius: var(--r-lg);
+  border: 1px solid #23324d;
+  max-height: 320px;
+  overflow: auto;
+}
+
+
+/* == 4) FORMULÁRIOS ======================================================= */
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: var(--r-lg);
+  border: 1px solid #2a3c5c;
+  background: #0f1728;
+  color: var(--text);
+  font-size: var(--fz-2);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+input::file-selector-button {
+  margin-right: var(--sp-2);
+  border: none;
+  background: #1f2b40;
+  color: #cfe3ff;
+  padding: 8px 12px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+input::file-selector-button:hover { filter: brightness(1.05); }
+
+input:focus-visible,
+select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: var(--focus);
+}
+
+
+/* == 5) UTILIDADES (helpers) ============================================= */
+.row { display: flex; gap: var(--sp-3); align-items: center; flex-wrap: wrap; }
+.flex1 { flex: 1; }
+.gap6 { gap: 6px; }
+
+.mb10 { margin-bottom: var(--sp-4); }
+.mt10 { margin-top:    var(--sp-4); }
+.mt12 { margin-top:    var(--sp-3); }
+.mt14 { margin-top:    14px; }
+.mt16 { margin-top:    var(--sp-4); }
+
+
+/* == 6) RESPONSIVO & ACESSIBILIDADE ====================================== */
+/* Larguras maiores: espaço extra no container; se amanhã existir 2 colunas,
+   basta trocar grid-template-columns aqui. */
+@media (min-width: 1024px) {
+  .wrap { max-width: 1100px; }
+}
+
+/* Reduz animações para usuários com preferência por menos movimento */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
